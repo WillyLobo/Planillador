@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% load static %}
+  <!-- Bootstrap & Popper JS-->
+  <link rel="stylesheet" type="text/css" href="{% static "/Bootstrap5/css/bootstrap.min.css" %}">
+  <script src="{% static "/Bootstrap5/js/bootstrap.bundle.min.js" %}"></script>
+  <!-- HTMX  
+  <script src="{% static "/htmx/htmx.min.js" %}"></script>
+  -->
+  
+<title>Planillador V0.1a</title>
+
+</head>
+
+<body>
+
+<div class="container">
+	{% block content %}
+	Contenido dinámico
+	{% endblock %}
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,506 @@
+{% extends "base.html" %}
+{% block content %}
+{% load static %}
+
+<style>
+    @font-face { font-family: Swiss; src: url('/static/Swiss 911 Compressed Regular.otf'); }
+    * {
+        font-family: Swiss !important
+    }
+    .no-border {
+        border: 0;
+    }
+    tr td{
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+</style>
+
+<div class="row border border-dark rounded rounded-3 p-2">
+    <div class="col-6">
+        <span class="fs-3 border border-dark rounded">Datos Generales</span>
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text">Nombre</div>
+            </div>
+            <input type="text" name="nombrePersonaje" class="form-control" id="id_nombrePersonaje" value="{{object.nombrePersonaje}}" placeholder="Nombre del Personaje">
+        </div>
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text">Jugador</div>
+            </div>
+            <input type="text" name="nombreJugador" class="form-control" id="id_nombreJugador" value="{{request.user}}" placeholder="Nombre del Jugador">
+        </div>
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text">Edad</div>
+            </div>
+            <input type="number" name="edadPersonaje" class="form-control" id="id_edadPersonaje" value="{{object.edadPersonaje}}" placeholder="Edad" min="0">
+            <div class="input-group-prepend">
+                <div class="input-group-text">Género</div>
+            </div>
+            <input type="text" name="generoPersonaje" class="form-control" id="id_generoPersonaje" value="{{object.generoPersonaje}}" placeholder="Género">
+        </div>
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text">Raza</div>
+            </div>
+            <select class="form-select" name="razaPersonaje" required id="id_razaPersonaje">
+                <option value="">---------</option>
+                <option value="H" {%if object.razaPersonaje == "H"%}selected{%endif%}>Humano</option>
+                <option value="G" {%if object.razaPersonaje == "G"%}selected{%endif%}>Ghoul</option>
+                <option value="S" {%if object.razaPersonaje == "S"%}selected{%endif%}>Super-Mutante</option>
+                <option value="D" {%if object.razaPersonaje == "D"%}selected{%endif%}>Garra Mortal</option>
+                <option value="P" {%if object.razaPersonaje == "P"%}selected{%endif%}>Perro</option>
+                <option value="R" {%if object.razaPersonaje == "R"%}selected{%endif%}>Robot</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text">Altura</div>
+            </div>
+            <input type="number" name="alturaPersonaje" class="form-control" id="id_alturaPersonaje" value="{{object.alturaPersonaje}}" placeholder="Altura" min="0" step="0.01">
+            <div class="input-group-prepend">
+                <div class="input-group-text">Peso</div>
+            </div>
+            <input type="number" name="pesoPersonaje" class="form-control" id="id_pesoPersonaje" value="{{object.pesoPersonaje}}" placeholder="Peso" min="0">
+        </div>
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text">Facción/Alianza</div>
+            </div>
+            <input type="text" name="faccionPersonaje" class="form-control" id="id_faccionPersonaje" value="{{object.faccionPersonaje}}" placeholder="Facción">
+        </div>
+    </div>
+    <div class="col-3 border">
+        
+        <img src="{% static "vaultboy-launcher.jpg" %}" title="Vault Boy" class="img-fluid" onclick="actualizar()" />
+        
+    </div>
+    <div class="col-3">
+        <span class="fs-3 border border-dark rounded">Status</span>
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text">Nivel</div>
+            </div>
+            <input type="number" name="nivelPersonaje" class="form-control" id="id_nivelPersonaje" value="{{object.nivelPersonaje}}" onchange="actualizarModificadoresAtributosSecundarios()">
+        </div>
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text">Experiencia</div>
+            </div>
+            <input type="text" name="experienciaPersonaje" class="form-control" id="id_experienciaPersonaje" value="{{object.experienciaPersonaje}}" placeholder="XP">
+        </div>
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text">Karma</div>
+            </div>
+            <input type="text" name="karmaPersonaje" class="form-control" id="id_karmaPersonaje" value="{{object.karmaPersonaje}}" placeholder="Karma">
+        </div>
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text">PG/Nivel (3+(RE/2)) »</div>
+            </div>
+            <input type="text" class="form-control" id="pgPorNivelPersonaje" value="0">
+        </div>
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text">PH/Nivel (5+(2*IN)) »</div>
+            </div>
+            <input type="text" class="form-control" id="habilidadPorNivelPersonaje" value="0">
+        </div>
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text">Perks/Nivel</div>
+            </div>
+            <input type="text" class="form-control" id="perksPorNivelPersonaje" value="1">
+        </div>
+    </div>
+</div>
+<div class="row border border-dark rounded rounded-3 p-2">
+    <div class="col-3">
+        <span class="fs-3 border border-dark rounded">Atributos Primarios</span>
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text fs-1">FU-</div>
+            </div>
+            <input type="number" name="SrtStat" class="form-control fs-1" id="id_StrStat" value="{{object.StrStat}}" min="1" step="1" onchange="actualizarModificadoresAtributosSecundarios()">
+        </div>
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text fs-1">PE-</div>
+            </div>
+            <input type="number" name="PerStat" class="form-control fs-1" id="id_PerStat" value="{{object.PerStat}}" min="1" step="1" onchange="actualizarModificadoresAtributosSecundarios()">
+        </div>
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text fs-1">RE-</div>
+            </div>
+            <input type="number" name="ResStat" class="form-control fs-1" id="id_ResStat" value="{{object.ResStat}}" min="1" step="1" onchange="actualizarModificadoresAtributosSecundarios()">
+        </div>
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text fs-1">CA-</div>
+            </div>
+            <input type="number" name="CarStat" class="form-control fs-1" id="id_CarStat" value="{{object.CarStat}}" min="1" step="1" onchange="actualizarModificadoresAtributosSecundarios()">
+        </div>
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text fs-1">IN-</div>
+            </div>
+            <input type="number" name="IntStat" class="form-control fs-1" id="id_IntStat" value="{{object.IntStat}}" min="1" step="1" onchange="actualizarModificadoresAtributosSecundarios()">
+        </div>
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text fs-1">AG-</div>
+            </div>
+            <input type="number" name="AgiStat" class="form-control fs-1" id="id_AgiStat" value="{{object.AgiStat}}" min="1" step="1" onchange="actualizarModificadoresAtributosSecundarios()">
+        </div>
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text fs-1">SU-</div>
+            </div>
+            <input type="number" name="SueStat" class="form-control fs-1" id="id_SueStat" value="{{object.SueStat}}" min="1" step="1" onchange="actualizarModificadoresAtributosSecundarios()">
+        </div>
+    </div>
+    <div class="col-3 border border-dark">
+        <span class="fs-3 border border-dark rounded">Atributos Secundarios</span>
+        
+        <div class="row"><span>PUNTOS DE ACCION » (5+AG/2)</span></div>
+        <div class="row">
+            <div class="col-2 ms-3 p-0 border-top"><span>Base:</span></div>
+            <div class="col-1 p-0 border-top"><span class="fs-5"id="apBase">*</span></div>
+            <div class="col-2 p-0 border-top"><span>+/-</span></div>
+            <div class="col-1 p-0 border-top"><input type="text" class="form-control p-0 m-0 fs-5 shadow-none no-border" value="0" min="0" id="apMod"></div>
+            <div class="col-2 p-0 border-top"><span>Total:</span></div>
+            <div class="col-1 p-0 border-top"><span class="fs-5" id="apTotal">*</span></div>
+        </div>
+        <div class="row border-top border-dark"><span>SECUENCIA » (2xPE)</span></div>
+        <div class="row">
+            <div class="col-2 ms-3 p-0 border-top"><span>Base:</span></div>
+            <div class="col-1 p-0 border-top"><span class="fs-5"id="secBase">*</span></div>
+            <div class="col-2 p-0 border-top"><span>+/-</span></div>
+            <div class="col-1 p-0 border-top"><input type="text" class="form-control p-0 m-0 fs-5 shadow-none no-border" value="0" min="0" id="secMod"></div>
+            <div class="col-2 p-0 border-top"><span>Total:</span></div>
+            <div class="col-1 p-0 border-top"><span class="fs-5" id="secTotal">*</span></div>
+        </div>
+        <div class="row border-top border-dark"><span>DAÑO MELEE » (FU - 5) Minimo 1</span></div>
+        <div class="row">
+            <div class="col-2 ms-3 p-0 border-top"><span>Base:</span></div>
+            <div class="col-1 p-0 border-top"><span class="fs-5"id="dañoMeleeBase">*</span></div>
+            <div class="col-2 p-0 border-top"><span>+/-</span></div>
+            <div class="col-1 p-0 border-top"><input type="text" class="form-control p-0 m-0 fs-5 shadow-none no-border" value="0" min="0" id="dañoMeleeMod"></div>
+            <div class="col-2 p-0 border-top"><span>Total:</span></div>
+            <div class="col-1 p-0 border-top"><span class="fs-5" id="dañoMeleeTotal">*</span></div>
+        </div>
+        <div class="row border-top border-dark"><span>POSIBILIDAD DE CRITICO » (SU)</span></div>
+        <div class="row">
+            <div class="col-2 ms-3 p-0 border-top"><span>Base:</span></div>
+            <div class="col-1 p-0 border-top"><span class="fs-5"id="probCriticoBase">*</span></div>
+            <div class="col-2 p-0 border-top"><span>+/-</span></div>
+            <div class="col-1 p-0 border-top"><input type="text" class="form-control p-0 m-0 fs-5 shadow-none no-border" value="0" min="0" id="probCriticoMod"></div>
+            <div class="col-2 p-0 border-top"><span>Total:</span></div>
+            <div class="col-1 p-0 border-top"><span class="fs-5" id="probCriticoTotal">*</span></div>
+        </div>
+        <div class="row border-top border-dark"><span>RATIO CURACION » (RE / 3)</span></div>
+        <div class="row">
+            <div class="col-2 ms-3 p-0 border-top"><span>Base:</span></div>
+            <div class="col-1 p-0 border-top"><span class="fs-5"id="ratioCuracionBase">*</span></div>
+            <div class="col-2 p-0 border-top"><span>+/-</span></div>
+            <div class="col-1 p-0 border-top"><input type="text" class="form-control p-0 m-0 fs-5 shadow-none no-border" value="0" min="0" id="ratioCuracionMod"></div>
+            <div class="col-2 p-0 border-top"><span>Total:</span></div>
+            <div class="col-1 p-0 border-top"><span class="fs-5" id="ratioCuracionTotal">*</span></div>
+        </div>
+        <div class="row border-top border-dark"><span>CAPACIDAD DE CARGA » (25 + 25xFU) lbs</span></div>
+        <div class="row">
+            <div class="col-2 ms-3 p-0 border-top"><span>Base:</span></div>
+            <div class="col-1 me-1 p-0 border-top"><span class="fs-5" id="capCargaBase">*</span></div>
+            <div class="col-2 p-0 border-top"><span>+/-</span></div>
+            <div class="col-1 p-0 border-top"><input type="text" class="form-control p-0 m-0 fs-5 shadow-none no-border" value="0" min="0" id="capCargaMod"></div>
+            <div class="col-2 p-0 border-top"><span>Total:</span></div>
+            <div class="col-1 p-0 border-top"><span class="fs-5" id="capCargaTotal">*</span></div>
+        </div>
+        <div class="row border-top border-dark"><span>RESISTENCIA VENENO » (5 x RE)</span></div>
+        <div class="row">
+            <div class="col-2 ms-3 p-0 border-top"><span>Base:</span></div>
+            <div class="col-1 me-1 p-0 border-top"><span class="fs-5" id="resVenenoBase">*</span></div>
+            <div class="col-2 p-0 border-top"><span>+/-</span></div>
+            <div class="col-1 p-0 border-top"><input type="text" class="form-control p-0 m-0 fs-5 shadow-none no-border" value="0" min="0" id="resVenenoMod"></div>
+            <div class="col-2 p-0 border-top"><span>Total:</span></div>
+            <div class="col-1 p-0 border-top"><span class="fs-5" id="resVenenoTotal">*</span></div>
+        </div>
+        <div class="row border-top border-dark"><span>RESISTENCIA RADIACION » (2 x RE)</span></div>
+        <div class="row">
+            <div class="col-2 ms-3 p-0 border-top"><span>Base:</span></div>
+            <div class="col-1 me-1 p-0 border-top"><span class="fs-5" id="resRadiacionBase">*</span></div>
+            <div class="col-2 p-0 border-top"><span>+/-</span></div>
+            <div class="col-1 p-0 border-top"><input type="text" class="form-control p-0 m-0 fs-5 shadow-none no-border" value="0" min="0" id="resRadiacionMod"></div>
+            <div class="col-2 p-0 border-top"><span>Total:</span></div>
+            <div class="col-1 p-0 border-top"><span class="fs-5" id="resRadiacionTotal">*</span></div>
+        </div>
+        <div class="row border-top border-dark"><span>RESISTENCIA ELECTRICIDAD »</span></div>
+        <div class="row">
+            <div class="col-2 ms-3 p-0 border-top"><span>Base:</span></div>
+            <div class="col-1 me-1 p-0 border-top"><span class="fs-5" id="resElectricidadBase">*</span></div>
+            <div class="col-2 p-0 border-top"><span>+/-</span></div>
+            <div class="col-1 p-0 border-top"><input type="text" class="form-control p-0 m-0 fs-5 shadow-none no-border" value="0" min="0" id="resElectricidadMod"></div>
+            <div class="col-2 p-0 border-top"><span>Total:</span></div>
+            <div class="col-1 p-0 border-top"><span class="fs-5" id="resElectricidadTotal">*</span></div>
+        </div>
+        <div class="row border-top border-dark"><span>RESISTENCIA GAS »</span></div>
+        <div class="row">
+            <div class="col-2 ms-3 p-0 border-top"><span>Base:</span></div>
+            <div class="col-1 me-1 p-0 border-top"><span class="fs-5" id="resGasBase">*</span></div>
+            <div class="col-2 p-0 border-top"><span>+/-</span></div>
+            <div class="col-1 p-0 border-top"><input type="text" class="form-control p-0 m-0 fs-5 shadow-none no-border" value="0" min="0" id="resGasMod"></div>
+            <div class="col-2 p-0 border-top"><span>Total:</span></div>
+            <div class="col-1 p-0 border-top"><span class="fs-5" id="resGasTotal">*</span></div>
+        </div>
+        <div class="row border-top border-dark"><span>IMPLANTE » (10 x (IN + RE))</span></div>
+        <div class="row">
+            <div class="col-2 ms-3 p-0 border-top"><span>Base:</span></div>
+            <div class="col-1 me-1 p-0 border-top"><span class="fs-5" id="implanteBase">*</span></div>
+            <div class="col-2 p-0 border-top"><span>+/-</span></div>
+            <div class="col-1 p-0 border-top"><input type="text" class="form-control p-0 m-0 fs-5 shadow-none no-border" value="0" min="0" id="implanteMod"></div>
+            <div class="col-2 p-0 border-top"><span>Total:</span></div>
+            <div class="col-1 p-0 border-top"><span class="fs-5" id="implanteTotal">*</span></div>
+        </div>
+
+    </div>
+    
+    <div class="col-6 border border-dark">
+        <span class="fs-3 border border-dark rounded">HABILIDADES</span>
+        <small>((0-125 1p=1p) (126-150 2p=1p) (151-175 3p=1p) (176-... 5p=1p)</small>
+        <table class="table table-sm">
+            <thead class="border-bottom border-dark">
+              <tr>
+                <td class="col-6"></td>
+                <td>Base</td>
+                <td></td>
+                <td>+/-</td>
+                <td></td>
+                <td>Total</td>
+                <td></td>
+                <td class="col-1"></td>
+              </tr>
+            </thdead>
+            <tbody>
+              <tr class="border-bottom border-dark">
+                <td class="col-6"><input class="form-check-input" type="checkbox" name="armasPequenasTag" value="{{object.armasPequenasTag}}" id="id_armasPequenasTag" onchange="actualizarHabilidades()"> ARMAS PEQUEÑAS » (5%+4xAG)</td>
+                <td class="col-1" id="armasPequenasBase"> *** </td>
+                <td class="col-1"><input class="d-none" name ="armasPequenasSkill" type="text" id="id_armasPequenasSkill" value="{{object.armasPequenasSkill}}"> % </td>
+                <td class="col-1"><input type="text" class="form-control p-0 m-0 shadow-none no-border" value="0" min="0" id="armasPequenasMod" onchange="actualizar()"></td>
+                <td class="col-1"> % </td>
+                <td class="col-1" id="armasPequenasTotal"> *** </td>
+                <td class="col-1"> % </td>
+                <td class="col-1"><nobr><img src="{% static "minus-circle.svg"%}" width="14" heigth="14" onclick="habilidadMinus('armasPequenasBase','armasPequenasMod','id_armasPequenasSkill','id_armasPequenasTag','armasPequenasTotal')" /> <img src="{% static "plus-circle.svg"%}" width="14" heigth="14" onclick="habilidadPlus('armasPequenasBase','armasPequenasMod','id_armasPequenasSkill','id_armasPequenasTag','armasPequenasTotal')"/></nobr></td>
+              </tr>
+ <!--             <tr class="border-bottom border-dark">
+                <td class="col-6"><input class="form-check-input" type="checkbox" value="" id="armasGrandesCheck"> ARMAS GRANDES » (0%+2xAG)</td>
+                <td id="armasGrandesBase"> *** </td>
+                <td class="col-1"> % </td>
+                <td class="col-1"><input type="text" class="form-control p-0 m-0 shadow-none no-border" value="0" min="0" id="armasGrandesMod" onchange="actualizar()"></td>
+                <td class="col-1"> % </td>
+                <td class="col-1" id="armasGrandesTotal"> *** </td>
+                <td class="col-1"> % </td>
+                <td class="col-1"><nobr><img src="{% static "minus-circle.svg"%}" width="14" heigth="14" onclick="habilidadMinus('armasGrandesBase')" /> <img src="{% static "plus-circle.svg"%}" width="14" heigth="14" onclick="habilidadPlus('armasGrandesBase','armasGrandesMod','armasGrandesTotal')"/></nobr></td>
+              </tr>
+              <tr class="border-bottom border-dark">
+                <td class="col-6"><input class="form-check-input" type="checkbox" value="" id="armasEnergiaCheck"> ARMAS DE ENERGIA » (0%+2xAG)</td>
+                <td id="armasEnergiaBase"> *** </td>
+                <td class="col-1"> % </td>
+                <td class="col-1"><input type="text" class="form-control p-0 m-0 shadow-none no-border" value="0" min="0" id="armasEnergiaMod" onchange="actualizar()"></td>
+                <td class="col-1"> % </td>
+                <td class="col-1" id="armasEnergiaTotal"> *** </td>
+                <td class="col-1"> % </td>
+                <td class="col-1"><nobr><img src="{% static "minus-circle.svg"%}" width="14" heigth="14" onclick="armasEnergiaMinus()" /> <img src="{% static "plus-circle.svg"%}" width="14" heigth="14" onclick="armasEnergiaPlus()"/></nobr></td>
+              </tr>
+              <tr class="border-bottom border-dark">
+                <td class="col-6"><input class="form-check-input" type="checkbox" value="" id="desarmadoCheck"> DESARMADO » (30%+2x(AG+FU))</td>
+                <td id="desarmadoBase"> *** </td>
+                <td class="col-1"> % </td>
+                <td class="col-1"><input type="text" class="form-control p-0 m-0 shadow-none no-border" value="0" min="0" id="desarmadoMod" onchange="actualizar()"></td>
+                <td class="col-1"> % </td>
+                <td class="col-1" id="desarmadoTotal"> *** </td>
+                <td class="col-1"> % </td>
+                <td class="col-1"><nobr><img src="{% static "minus-circle.svg"%}" width="14" heigth="14" onclick="desarmadoMinus()" /> <img src="{% static "plus-circle.svg"%}" width="14" heigth="14" onclick="desarmadoPlus()"/></nobr></td>
+              </tr> -->
+              <tr class="border-bottom border-dark">
+                <td class="col-6"><input class="form-check-input" type="checkbox" name="armasMeleeTag" id="id_armasMeleeTag" onchange="actualizarHabilidades()" {%if object.armasMeleeTag%}Checked{%endif%}> ARMAS MELEE » (20%+2x(AG+FU))</td>
+                <td class="col-1" id="armasMeleeBase"> *** </td>
+                <td class="col-1"><input class="d-none" name ="armasMeleeSkill" type="text" id="id_armasMeleeSkill" value="{{object.armasMeleeSkill}}"> % </td>
+                <td class="col-1"><input type="text" class="form-control p-0 m-0 shadow-none no-border" value="0" min="0" id="armasMeleeMod" onchange="actualizar()"></td>
+                <td class="col-1"> % </td>
+                <td class="col-1" id="armasMeleeTotal"> *** </td>
+                <td class="col-1"> % </td>
+                <td class="col-1"><nobr><img src="{% static "minus-circle.svg"%}" width="14" heigth="14" onclick="habilidadMinus('armasMeleeBase','armasMeleeMod','id_armasMeleeSkill','id_armasMeleeTag','armasMeleeTotal')" /> <img src="{% static "plus-circle.svg"%}" width="14" heigth="14" onclick="habilidadPlus('armasMeleeBase','armasMeleeMod','id_armasMeleeSkill','id_armasMeleeTag','armasMeleeTotal')"/></nobr></td>
+              </tr>
+            </tbody>
+          </table>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(event) { 
+        actualizarHabilidades();
+        actualizarModificadoresAtributosSecundarios();
+    });
+
+    function actualizar() {
+        actualizarHabilidades();
+        actualizarModificadoresAtributosSecundarios();
+    }
+
+    function actualizarHabilidades() {
+        var fue = parseInt(document.getElementById("id_StrStat").value)
+        var per = parseInt(document.getElementById("id_PerStat").value)
+        var res = parseInt(document.getElementById("id_ResStat").value)
+        var car = parseInt(document.getElementById("id_CarStat").value)
+        var int = parseInt(document.getElementById("id_IntStat").value)
+        var agi = parseInt(document.getElementById("id_AgiStat").value)
+        var sue = parseInt(document.getElementById("id_SueStat").value)
+
+        if (document.getElementById("id_armasPequenasTag").checked == true) {
+            document.getElementById("armasPequenasBase").innerHTML = (5 + 4 * agi) + 20
+        } else {
+            document.getElementById("armasPequenasBase").innerHTML = 5 + 4 * agi
+        };
+
+        if (document.getElementById("id_armasMeleeTag").checked == true) {
+            document.getElementById("armasMeleeBase").innerHTML = (20 + 2 * (agi + fue)) + 20
+        } else {
+            document.getElementById("armasMeleeBase").innerHTML = 20 + 2 * (agi + fue)
+        };
+
+        document.getElementById("armasPequenasTotal").innerHTML = parseInt(document.getElementById("armasPequenasBase").innerHTML) + parseInt(document.getElementById("id_armasPequenasSkill").value) + parseInt(document.getElementById("armasPequenasMod").value)
+        document.getElementById("armasMeleeTotal").innerHTML = parseInt(document.getElementById("armasMeleeBase").innerHTML) + parseInt(document.getElementById("id_armasMeleeSkill").value) + parseInt(document.getElementById("armasMeleeMod").value)
+
+    }
+
+    function habilidadPlus(habBase, habMod, habSkill, habSkillCheck, habTotal) {
+        // Params: habilidad base, habilidad Mod, habilidad SkillPoints, habilidad Skill Check, habilidad total
+        habBase = document.getElementById(habBase)
+        habMod = document.getElementById(habMod)
+        habSkill = document.getElementById(habSkill)
+        habTotal = document.getElementById(habTotal)
+        habSkillCheck = document.getElementById(habSkillCheck)
+        var habSkillCheckMultiplier
+
+        // Solucion temporal al Skill Checked
+        if (habSkillCheck.checked == true) {
+            habSkillCheckMultiplier = 2
+        } else {
+            habSkillCheckMultiplier = 1
+        }
+
+        // Insert gif de vómito
+        if (parseInt(habTotal.innerHTML) > 175) {
+                habSkill.value = parseFloat(habSkill.value) + ((1/5))
+        } else if (parseInt(habTotal.innerHTML) > 150) {
+                habSkill.value = parseFloat(habSkill.value) + ((1/3))
+        } else if (parseInt(habTotal.innerHTML) > 125) {
+            habSkill.value = parseFloat(habSkill.value) + ((1/2))
+        } else if (parseInt(habTotal.innerHTML) <= 125) {
+                habSkill.value = parseInt(habSkill.value) + (1)
+            } else if (parseInt(habTotal.innerHTML) <= 125) {
+                if (habSkill.value <= 0) {
+                    habSkill.value = 0
+                } else {
+                    habSkill.value = parseInt(habSkill.value) - (1)
+                }
+        }
+        habSkill.value = habSkill.value * habSkillCheckMultiplier
+        console.log(habSkillCheckMultiplier, habSkill.value)
+        actualizarHabilidades()
+    }
+
+    function habilidadMinus(habBase, habMod, habSkill, habSkillCheck, habTotal) {
+        // Params: habilidad base, habilidad Mod, habilidad SkillPoints, habilidad total
+        habBase = document.getElementById(habBase)
+        habMod = document.getElementById(habMod)
+        habSkill = document.getElementById(habSkill)
+        habTotal = document.getElementById(habTotal)
+        habSkillCheck = document.getElementById(habSkillCheck)
+        var habSkillCheckMultiplier = 1
+
+        // Solucion temporal al Skill Checked
+        if (habSkillCheck.checked == true) {
+            habSkillCheckMultiplier = 2
+        } else {
+            habSkillCheckMultiplier = 1
+        }
+        // Insert gif de vómito
+        if (parseInt(habTotal.innerHTML) > 175) {
+                habSkill.value = parseFloat(habSkill.value) - ((1/5) * habSkillCheckMultiplier)
+        } else if (parseInt(habTotal.innerHTML) > 150) {
+                habSkill.value = parseFloat(habSkill.value) - ((1/3) * habSkillCheckMultiplier)
+        } else if (parseInt(habTotal.innerHTML) > 125) {
+            habSkill.value = parseFloat(habSkill.value) - ((1/2) * habSkillCheckMultiplier)
+        } else if (parseInt(habTotal.innerHTML) <= 125) {
+            if (habSkill.value <= 0) {
+                habSkill.value = 0
+            } else {
+                habSkill.value = parseInt(habSkill.value) - (1 * habSkillCheckMultiplier)
+            }
+        }
+        console.log(habSkillCheckMultiplier, habSkill.value)
+        actualizarHabilidades()
+    }
+
+    function actualizarModificadoresAtributosSecundarios() {
+        var fue = parseInt(document.getElementById("id_StrStat").value)
+        var per = parseInt(document.getElementById("id_PerStat").value)
+        var res = parseInt(document.getElementById("id_ResStat").value)
+        var car = parseInt(document.getElementById("id_CarStat").value)
+        var int = parseInt(document.getElementById("id_IntStat").value)
+        var agi = parseInt(document.getElementById("id_AgiStat").value)
+        var sue = parseInt(document.getElementById("id_SueStat").value)
+        // Puntos de Golpe por Nivel
+        document.getElementById("pgPorNivelPersonaje").value = Math.floor(3 + (res /2))
+        // Puntos de Habilidad por Nivel
+        document.getElementById("habilidadPorNivelPersonaje").value = Math.floor(5 + (2 + int))
+
+        // Puntos de Accion
+        document.getElementById("apBase").innerHTML = Math.floor(5 + agi / 2)
+        document.getElementById("apTotal").innerHTML = parseInt(document.getElementById("apBase").innerHTML) + parseInt(document.getElementById("apMod").value)
+        // Secuencia
+        document.getElementById("secBase").innerHTML = Math.floor(2* per)
+        document.getElementById("secTotal").innerHTML = parseInt(document.getElementById("secBase").innerHTML) + parseInt(document.getElementById("secMod").value)
+        // Bonuns Daño Melee
+        if (Math.floor(fue-5) < 1) {
+            document.getElementById("dañoMeleeBase").innerHTML = 1
+        }
+        else {
+            document.getElementById("dañoMeleeBase").innerHTML = Math.floor(fue-5)
+        };
+        document.getElementById("dañoMeleeTotal").innerHTML = parseInt(document.getElementById("dañoMeleeBase").innerHTML) + parseInt(document.getElementById("dañoMeleeMod").value)
+        // Probabilidad de Critico
+        document.getElementById("probCriticoBase").innerHTML = Math.floor(sue)
+        document.getElementById("probCriticoTotal").innerHTML = parseInt(document.getElementById("probCriticoBase").innerHTML) + parseInt(document.getElementById("probCriticoMod").value)
+        // Ratio de Curacion
+        document.getElementById("ratioCuracionBase").innerHTML = Math.floor(res/3)
+        document.getElementById("ratioCuracionTotal").innerHTML = parseInt(document.getElementById("ratioCuracionBase").innerHTML) + parseInt(document.getElementById("ratioCuracionMod").value)
+        // Capacidad de Carga
+        document.getElementById("capCargaBase").innerHTML = Math.floor(25 + 25*fue)
+        document.getElementById("capCargaTotal").innerHTML = parseInt(document.getElementById("capCargaBase").innerHTML) + parseInt(document.getElementById("capCargaMod").value)
+        // Resistencia al Veneno
+        document.getElementById("resVenenoBase").innerHTML = Math.floor(5 * res)
+        document.getElementById("resVenenoTotal").innerHTML = parseInt(document.getElementById("resVenenoBase").innerHTML) + parseInt(document.getElementById("resVenenoMod").value)
+        // Resistencia a la Radiacion
+        document.getElementById("resRadiacionBase").innerHTML = Math.floor(2 * res)
+        document.getElementById("resRadiacionTotal").innerHTML = parseInt(document.getElementById("resRadiacionBase").innerHTML) + parseInt(document.getElementById("resRadiacionMod").value)
+        // Resistencia a la Electricidad
+        document.getElementById("resElectricidadBase").innerHTML = 0
+        document.getElementById("resElectricidadTotal").innerHTML = parseInt(document.getElementById("resElectricidadBase").innerHTML) + parseInt(document.getElementById("resElectricidadMod").value)
+        // Resistencia al Gas
+        document.getElementById("resGasBase").innerHTML = 0
+        document.getElementById("resGasTotal").innerHTML = parseInt(document.getElementById("resGasBase").innerHTML) + parseInt(document.getElementById("resGasMod").value)
+        // Implante
+        document.getElementById("implanteBase").innerHTML = Math.floor(10 * (int + res))
+        document.getElementById("implanteTotal").innerHTML = parseInt(document.getElementById("implanteBase").innerHTML) + parseInt(document.getElementById("implanteMod").value)
+    }
+
+</script>
+
+{% endblock %}
